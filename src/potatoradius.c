@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <float.h>
 
 #ifdef _WIN32
     #define CLEAR "cls"
@@ -10,14 +11,16 @@
 
 double sqrt_custom(double S) {
     if (S < 0) return -1;
-    double x = S;
-    double eps = 1e-6;
+    if (S == 0) return 0;
+    if (S != S || S > DBL_MAX) return S; // NaN e infinito: Newton nunca convergiria
 
+    // Começando acima da raiz, Newton decresce até parar; um eps absoluto
+    // nunca é atingido para S grande (o ulp passa de 1e-6).
+    double x = S > 1 ? S : 1;
     while (1) {
         double nx = 0.5 * (x + S / x);
-        double diff = x - nx;
-        if (diff < eps && diff > -eps)
-            return nx;
+        if (nx >= x)
+            return x;
         x = nx;
     }
 }
@@ -59,10 +62,16 @@ int main() {
         printf("Insira a densidade (kg/m^3): ");
         if (scanf("%lf", &rho) != 1) break;
 
-        double R = potatoRadiusFormula(ys, rho);
-
         printf("\n----------------------------------------------\n");
-        printf("Potato Radius (m): %.6f\n", R);
+        if (!(ys > 0) || !(rho > 0)) {
+            printf("Erro: yield strength e densidade devem ser maiores que zero.\n");
+        } else {
+            double R = potatoRadiusFormula(ys, rho);
+            if (R > DBL_MAX)
+                printf("Erro: densidade pequena demais, o raio estoura o double.\n");
+            else
+                printf("Potato Radius (m): %.6f\n", R);
+        }
         printf("----------------------------------------------\n\n");
 
         printf("Calcular novamente? (s/n): ");

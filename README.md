@@ -43,5 +43,5 @@ Essa formulação permite experimentar com materiais rochosos, metálicos, gelad
 ### Compilação
 
 ```bash
-gcc potato_radius.c -o potato
+gcc src/potatoradius.c -o potato
 
